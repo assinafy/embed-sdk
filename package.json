@@ -1,0 +1,56 @@
+{
+  "name": "@assinafy/embed-sdk",
+  "version": "1.0.0",
+  "description": "Framework-independent browser SDK for Assinafy embedded signing.",
+  "homepage": "https://www.assinafy.com.br",
+  "license": "MIT",
+  "author": "Assinafy Dev Team <assinafy@assinafy.com.br>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/assinafy/embed-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/assinafy/embed-sdk/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "packageManager": "npm@12.2.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.global.js",
+  "jsdelivr": "./dist/index.global.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup && tsc --emitDeclarationOnly",
+    "typecheck": "tsc --noEmit",
+    "typecheck:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build && node --enable-source-maps --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
+    "verify": "npm run typecheck && npm test && npm run typecheck:test && npm pack --dry-run",
+    "prepublishOnly": "npm run verify"
+  },
+  "keywords": [
+    "assinafy",
+    "esignature",
+    "embedded-signing",
+    "iframe",
+    "sdk"
+  ],
+  "devDependencies": {
+    "playwright": "1.64.1",
+    "tsup": "8.5.1",
+    "typescript": "7.0.2"
+  }
+}
