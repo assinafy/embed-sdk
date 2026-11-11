@@ -1,6 +1,6 @@
 {
   "name": "@assinafy/embed-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Framework-independent browser SDK for Assinafy embedded signing.",
   "homepage": "https://www.assinafy.com.br",
   "license": "MIT",
