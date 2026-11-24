@@ -32,7 +32,21 @@ signing.on("error", (payload) => {
   const code: AssinafyErrorCode = payload.code;
   const message: string = payload.message;
   void [code, message];
+  // @ts-expect-error Event payloads cannot be mutated by consumers.
+  payload.code = "changed";
 });
+
+declare const container: HTMLElement;
+const mounted: void = signing.mount(container);
+const subscribed: void = signing.on("ready", () => {});
+const destroyed: void = signing.destroy();
+void [mounted, subscribed, destroyed];
+
+// @ts-expect-error A session URL is required.
+create({});
+
+// @ts-expect-error Mount targets must be selectors or HTML elements.
+signing.mount(42);
 
 // @ts-expect-error Only documented frame events are accepted.
 signing.on("cancelled", () => {});

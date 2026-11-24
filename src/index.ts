@@ -37,15 +37,19 @@ export interface SigningEventPayloads {
 export type SigningEventName = keyof SigningEventPayloads;
 
 export interface CreateOptions {
+  /** Fresh, single-use HTTPS URL minted by your backend. Never an API key or OAuth token. */
   readonly sessionUrl: string;
 }
 
 export interface Signing {
+  /** Register a typed event handler. Returns void; duplicate handlers are registered once. */
   on<Name extends SigningEventName>(
     event: Name,
     handler: (payload: SigningEventPayloads[Name]) => void,
   ): void;
+  /** Append the signing iframe to a CSS selector or element. Mount once per instance. */
   mount(target: string | HTMLElement): void;
+  /** Remove the iframe, timers and handlers. Safe to call repeatedly; the instance cannot be reused. */
   destroy(): void;
 }
 
@@ -63,7 +67,7 @@ const VALIDATORS: {
   signed: (p) => VALIDATORS.ready(p) && typeof p.via === "string",
   declined: (p) => VALIDATORS.signed(p),
   resize: (p) => Number.isFinite(p.height),
-  // Tolerate a missing message: until 2026-11-11 the live frame sent origin_not_allowed without one.
+  // Older frames omit the descriptive message; handlers still receive a string.
   error: (p) => typeof p.code === "string" && (p.message === undefined || typeof p.message === "string"),
 };
 
@@ -170,7 +174,15 @@ class SigningClient implements Signing {
     hostWindow.addEventListener("message", this.#onMessage);
     this.#frame = frame;
     this.#hostWindow = hostWindow;
-    container.appendChild(frame);
+    try {
+      container.appendChild(frame);
+    } catch (error) {
+      hostWindow.removeEventListener("message", this.#onMessage);
+      frame.removeEventListener("load", this.#startHello);
+      this.#frame = null;
+      this.#hostWindow = null;
+      throw error;
+    }
   }
 
   destroy(): void {
@@ -229,8 +241,8 @@ class SigningClient implements Signing {
     const message = parseMessage(event.data);
     if (!message) return;
 
-    // Any valid reply proves the frame is listening.
-    this.#stopHello();
+    // A resize can precede origin verification and must not end the handshake.
+    if (message.name !== "resize") this.#stopHello();
     if (message.name === "error") this.#frameFailed = true;
 
     if (message.name === "resize" && this.#frame) {
@@ -265,6 +277,7 @@ class SigningClient implements Signing {
   };
 }
 
+/** Create an unmounted signing session. Throws TypeError for non-HTTPS or credential-bearing URLs. */
 export function create(options: CreateOptions): Signing {
   return new SigningClient(options);
 }

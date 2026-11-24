@@ -1,6 +1,6 @@
 {
   "name": "@assinafy/embed-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Framework-independent browser SDK for Assinafy embedded signing.",
   "homepage": "https://www.assinafy.com.br",
   "license": "MIT",
@@ -31,7 +31,10 @@
   "files": [
     "dist",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "README.en.md",
+    "CONTRIBUTING.md",
+    "docs"
   ],
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly",

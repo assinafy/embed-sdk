@@ -244,7 +244,7 @@ test("a frame error before iframe load suppresses the handshake and its timeout"
   signing.destroy();
 });
 
-test("any valid frame message stops the hello", () => {
+test("resize cannot complete the handshake before ready", () => {
   const fixture = browserFixture();
   const signing = create({ sessionUrl: SESSION_URL });
   signing.mount(fixture.container);
@@ -256,7 +256,31 @@ test("any valid frame message stops the hello", () => {
     payload: { height: 300 },
   }));
 
+  assert.equal(fixture.intervals.size, 1);
+  [...fixture.intervals.values()][0]();
+  assert.equal(fixture.posted.length, 2);
+  fixture.dispatchMessage(messageEvent(fixture, {
+    v: 1,
+    type: "assinafy:ready",
+    payload: { document_id: "d", signer_id: "s" },
+  }));
   assert.equal(fixture.intervals.size, 0);
+  signing.destroy();
+});
+
+test("a failed mount releases listeners and permits a retry", () => {
+  const fixture = browserFixture();
+  const signing = create({ sessionUrl: SESSION_URL });
+  const append = fixture.container.appendChild;
+  fixture.container.appendChild = () => { throw new Error("Cannot append"); };
+  assert.throws(() => signing.mount(fixture.container), /Cannot append/);
+  assert.equal(fixture.windowListeners.size, 0);
+  fixture.emitLoad();
+  assert.equal(fixture.intervals.size, 0);
+  fixture.container.appendChild = append;
+  signing.mount(fixture.container);
+  fixture.emitLoad();
+  assert.equal(fixture.intervals.size, 1);
   signing.destroy();
 });
 

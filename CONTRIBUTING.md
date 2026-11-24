@@ -23,7 +23,7 @@ GitHub Actions publishes to npm with [trusted publishing](https://docs.npmjs.com
 
 1. Set the version: `npm version <x.y.z> --no-git-tag-version`.
 2. Update the CDN snippet in both READMEs (`npm test` prints the hash).
-3. Commit as `Assinafy Dev Team <assinafy@assinafy.com.br>` and merge to `main`.
+3. Commit with the configured project identity and merge to `main`.
 4. Tag and push:
 
    ```bash
@@ -33,17 +33,11 @@ GitHub Actions publishes to npm with [trusted publishing](https://docs.npmjs.com
 
 `release.yml` checks that the tag matches `package.json`, runs `npm run verify`, publishes to npm, and creates the GitHub release.
 
-## Live tests
+## Live verification
 
-`live-test/` runs the built SDK against the real Assinafy frame. It is not part of `npm test` and needs an Embed-enabled workspace in `ASSINAFY_API_KEY` and `ASSINAFY_ACCOUNT_ID`. `setup.py` creates a test document and signer, `matrix.mjs` covers the handshake and error paths, `sign.mjs` signs for real, and `leak.mjs` checks the embed page's third-party requests:
+Run live verification separately from `npm test`, using an explicitly authorized workspace and disposable documents. Keep scripts, state, credentials and screenshots local and ignored. Record created IDs and remove only those resources after testing. Email verification requires the recipient's code; WhatsApp, certificate and identity verification require their respective account features and inputs.
 
-```bash
-npm run build
-python3 -I live-test/setup.py
-node live-test/matrix.mjs
-node live-test/sign.mjs
-node live-test/leak.mjs
-```
+`npm audit` checks dependency advisories; `git diff --check` checks whitespace. Strict TypeScript checks syntax and types; there is no separate lint configuration. Use a temporary Playwright browser/cache directory when testing and clean up only task-created resources.
 
 ## Package contents
 
@@ -51,3 +45,5 @@ node live-test/leak.mjs
 - `dist/index.global.js`: browser IIFE exposed as `window.Assinafy`;
 - `dist/index.d.ts`: TypeScript declarations;
 - source maps for both JavaScript bundles.
+
+Both READMEs, CONTRIBUTING.md and the linked `docs/` guides are included in the package. Local maintainer instructions and live verification scripts are excluded.
